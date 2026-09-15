@@ -729,26 +729,76 @@ function renderMySchool(){
   }
 }
 async function searchMySchool(){
+
   const name = document.getElementById('p-school-search').value.trim();
-  if(!name){ toast('학교명을 입력해주세요'); return; }
-  const level = document.getElementById('p-level').value;
-  const box = document.getElementById('p-school-result');
-  box.innerHTML = '<p class="hint">검색 중...</p>';
-  try{
-    const url = NEIS_BASE + 'schoolInfo?' + new URLSearchParams({ Type:'json', pIndex:'1', pSize:'10', ...(SCHOOL_CONFIG.KEY?{KEY:SCHOOL_CONFIG.KEY}:{}), SCHUL_NM:name });
-    const res = await fetch(url);
-    const data = await res.json();
-    const rows = data?.schoolInfo?.[1]?.row || [];
-    if(!rows.length){ box.innerHTML = '<div class="empty">검색 결과가 없어요.</div>'; return; }
-    box.innerHTML = rows.slice(0,8).map(r=>`
-      <div class="list-item">
-        <span>${esc(r.SCHUL_NM)} <span class="meta">· ${esc(r.ORG_RDNMA||'')}</span></span>
-        <button class="iconbtn" onclick='selectMySchool(${JSON.stringify(JSON.stringify({name:r.SCHUL_NM, office:r.ATPT_OFCDC_SC_CODE, code:r.SD_SCHUL_CODE, level}))})'>선택</button>
-      </div>`).join('');
-  }catch(err){
-    box.innerHTML = '<div class="empty">검색에 실패했어요. (네트워크 문제일 수 있어요)</div>';
-    console.error(err);
+
+  if(!name){
+    toast('학교명을 입력해주세요');
+    return;
   }
+
+  const level = document.getElementById('p-level').value;
+
+  const box = document.getElementById('p-school-result');
+
+  box.innerHTML = '<p class="hint">검색 중...</p>';
+
+  try{
+
+    const url = neisUrl('schoolInfo', {
+      SCHUL_NM: name
+    });
+
+    const res = await fetch(url);
+
+    if(!res.ok){
+      throw new Error(`HTTP ${res.status}`);
+    }
+
+    const data = await res.json();
+
+    const rows = data?.schoolInfo?.[1]?.row || [];
+
+    if(!rows.length){
+      box.innerHTML = '<div class="empty">검색 결과가 없어요.</div>';
+      return;
+    }
+
+    box.innerHTML = rows.slice(0, 8).map(r => `
+
+      <div class="list-item">
+
+        <span>
+          ${esc(r.SCHUL_NM)}
+          <span class="meta">
+            · ${esc(r.ORG_RDNMA || '')}
+          </span>
+        </span>
+
+        <button
+          class="iconbtn"
+          onclick='selectMySchool(${JSON.stringify(JSON.stringify({
+            name: r.SCHUL_NM,
+            office: r.ATPT_OFCDC_SC_CODE,
+            code: r.SD_SCHUL_CODE,
+            level
+          }))})'>
+          선택
+        </button>
+
+      </div>
+
+    `).join('');
+
+  }catch(err){
+
+    box.innerHTML =
+      '<div class="empty">검색에 실패했어요. (네트워크 문제일 수 있어요)</div>';
+
+    console.error(err);
+
+  }
+
 }
 function selectMySchool(jsonStr){
   const r = JSON.parse(jsonStr);
