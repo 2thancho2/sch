@@ -873,7 +873,7 @@ function renderHome(){
   document.getElementById('home-quicklinks').innerHTML = links.join('');
 }
 renderHome();
-  
+
 
 const SCHOOL_CONFIG = {
 
@@ -891,11 +891,9 @@ const SCHOOL_CONFIG = {
 
 };
 
-// Cloudflare Worker 주소
-const NEIS_BASE = 'https://너의-worker이름.workers.dev/';
+const NEIS_BASE = 'https://neis-api-proxy.bihaychoi1205.workers.dev/';
 
 function neisUrl(service, params) {
-
   const p = new URLSearchParams({
     Type: 'json',
     pIndex: '1',
@@ -907,9 +905,6 @@ function neisUrl(service, params) {
   return NEIS_BASE + '?' + p.toString();
 }
 
-
-// 설정(내 정보)에서 검색해 선택한 학교,
-// 입력한 학년/반이 있으면 SCHOOL_CONFIG보다 우선 사용
 function effectiveSchoolInfo() {
 
   const p = store.get('profile', {});
